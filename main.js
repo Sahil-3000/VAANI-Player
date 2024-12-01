@@ -1,5 +1,63 @@
 
 
+
+// Utility function to detect the image type from the file extension
+function detectImageType(url) {
+  const extension = url.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    case 'bmp':
+      return 'image/bmp';
+    case 'svg':
+      return 'image/svg+xml';
+    default:
+      return 'image/*'; // Fallback for unknown types
+  }
+}
+
+function updateMediaMetadata(song) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title.trim(),
+      artist: song.artist.trim(),
+      artwork: [
+        { src: song.cover, sizes: '96x96', type: detectImageType(song.cover) },
+        { src: song.cover, sizes: '128x128', type: detectImageType(song.cover) },
+        { src: song.cover, sizes: '256x256', type: detectImageType(song.cover) },
+        { src: song.cover, sizes: '512x512', type: detectImageType(song.cover) },
+      ]
+    });
+  }
+}
+
+navigator.mediaSession.setActionHandler('play', () => {
+  // Play the song
+  audio.play();
+});
+
+navigator.mediaSession.setActionHandler('pause', () => {
+  // Pause the song
+  audio.pause();
+});
+
+navigator.mediaSession.setActionHandler('nexttrack', () => {
+  // Play the next song
+  nextButton.onclick();
+});
+
+navigator.mediaSession.setActionHandler('previoustrack', () => {
+  // Play the previous song
+  prevButton.onclick();
+});
+
 const playlists = [playlist1, playlist2];
 let currentPlaylist = playlist1;
 let currentSongIndex = 0;
@@ -68,6 +126,7 @@ function loadSong(index) {
   audio.load();
   playSong();
   updateProgress();
+  updateMediaMetadata(song);
 }
 
 // Play the current song
@@ -75,6 +134,7 @@ function playSong() {
   isPlaying = true;
   audio.play();
   playPauseButton.textContent = "⏸";
+  updateMediaMetadata(song);
 }
 
 // Pause the current song
